@@ -101,6 +101,7 @@ public slots:
 	static dialogs::SettingsDialog *showSettings();
 	void reportAbuse();
 	void tryToGainOp();
+	void handleSpaceEmergency(int progress);
 	void resetSession();
 	void terminateSession();
 
@@ -300,6 +301,7 @@ private:
 
 	Document *m_doc;
 	bool m_exitAfterSave;
+	bool m_spaceEmergency;
 };
 
 #endif

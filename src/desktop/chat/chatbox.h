@@ -36,6 +36,8 @@ public:
 
 	bool isCollapsed() const { return m_state == State::Collapsed; }
 
+	ChatWidget *chatWidget() const { return m_chatWidget; }
+
 private slots:
 	void onCanvasChanged(canvas::CanvasModel *canvas);
 	void onServerLogin();

@@ -67,6 +67,7 @@ static constexpr auto CTRL_KEY = Qt::CTRL;
 #include "desktop/widgets/viewstatus.h"
 #include "desktop/widgets/netstatus.h"
 #include "desktop/chat/chatbox.h"
+#include "desktop/chat/chatwidget.h"
 
 #include "desktop/docks/toolsettingsdock.h"
 #include "desktop/docks/brushpalettedock.h"
@@ -176,7 +177,8 @@ MainWindow::MainWindow(bool restoreWindowPosition)
 	  m_titleBarsHidden(false),
 	  m_wasSessionLocked(false),
 	  m_doc(nullptr),
-	  m_exitAfterSave(false)
+	  m_exitAfterSave(false),
+	  m_spaceEmergency(false)
 {
 	// The document (initially empty)
 	m_doc = new Document(dpApp().settings(), this);
@@ -343,6 +345,7 @@ MainWindow::MainWindow(bool restoreWindowPosition)
 	connect(m_view, &widgets::CanvasView::pointerMoved, m_doc, &Document::sendPointerMove);
 
 	connect(m_doc, &Document::catchupProgress, m_netstatus, &widgets::NetStatus::setCatchupProgress);
+	connect(m_doc, &Document::catchupProgress, this, &MainWindow::handleSpaceEmergency);
 
 	connect(m_doc->client(), &net::Client::serverStatusUpdate, sessionHistorySize, [sessionHistorySize](int size) {
 		sessionHistorySize->setText(QString("%1 MB").arg(size / float(1024*1024), 0, 'f', 2));
@@ -1696,6 +1699,27 @@ void MainWindow::tryToGainOp()
 		m_doc->sendOpword(opword);
 }
 
+void MainWindow::handleSpaceEmergency(int progress)
+{
+	if(progress >= 100) {
+		canvas::CanvasModel *canvas =  m_doc->canvas();
+		bool looksLikeSpaceEmergency =
+			m_doc->client()->isConnected() && canvas &&
+			!canvas->userlist()->getOptionalUserById(canvas->localUserId());
+		if(looksLikeSpaceEmergency) {
+			m_spaceEmergency = true;
+			m_sessionSettings->setSpaceEmergency(true);
+			getAction("gainop")->setEnabled(true);
+			m_chatbox->chatWidget()->systemMessage(
+				tr("You don't exist! This session may be in a space emergency, "
+					"in which case it needs to be manually reset."), true);
+		} else {
+			m_spaceEmergency = false;
+			m_sessionSettings->setSpaceEmergency(false);
+		}
+	}
+}
+
 void MainWindow::resetSession()
 {
 	dialogs::ResetDialog *dlg = new dialogs::ResetDialog(
@@ -1713,10 +1737,10 @@ void MainWindow::resetSession()
 #endif
 
 	// Session resetting is available only to session operators
-	if(m_doc->canvas()->aclState()->amOperator()) {
+	if(m_doc->canvas()->aclState()->amOperator() || m_spaceEmergency) {
 		connect(dlg, &dialogs::ResetDialog::resetSelected, this, [this, dlg]() {
 			canvas::CanvasModel *canvas = m_doc->canvas();
-			if(canvas->aclState()->amOperator()) {
+			if(canvas->aclState()->amOperator() || m_spaceEmergency) {
 				drawdance::MessageList snapshot = dlg->getResetImage();
 				canvas->amendSnapshotMetadata(
 					snapshot, true, DP_ACL_STATE_RESET_IMAGE_SESSION_RESET_FLAGS);
@@ -1794,6 +1818,9 @@ void MainWindow::onServerConnected()
 	// Disable UI until login completes
 	m_view->setEnabled(false);
 	setDrawingToolsEnabled(false);
+
+	m_spaceEmergency = false;
+	m_sessionSettings->setSpaceEmergency(false);
 }
 
 /**
@@ -1808,6 +1835,8 @@ void MainWindow::onServerDisconnected(const QString &message, const QString &err
 	m_admintools->setEnabled(false);
 	m_modtools->setEnabled(false);
 	m_sessionSettings->close();
+	m_spaceEmergency = false;
+	m_sessionSettings->setSpaceEmergency(false);
 
 	// Re-enable UI
 	m_view->setEnabled(true);
@@ -1939,6 +1968,8 @@ void MainWindow::onOperatorModeChange(bool op)
 	m_serverLogDialog->setOperatorMode(op);
 	getAction("gainop")->setEnabled(!op && m_doc->isSessionOpword());
 	getAction("sessionundodepthlimit")->setEnabled(op && !m_doc->client()->isCompatibilityMode());
+	m_spaceEmergency = false;
+	m_sessionSettings->setSpaceEmergency(false);
 }
 
 void MainWindow::onFeatureAccessChange(DP_Feature feature, bool canUse)

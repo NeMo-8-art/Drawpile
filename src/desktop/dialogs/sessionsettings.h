@@ -36,6 +36,9 @@ public:
 	//! Is the local user authenticated/not a guest?
 	void setAuthenticated(bool);
 
+	bool spaceEmergency() const { return m_spaceEmergency; }
+	void setSpaceEmergency(bool);
+
 signals:
 	void requestAnnouncement(const QString &apiUrl);
 	void requestUnlisting(const QString &apiUrl);
@@ -92,6 +95,7 @@ private:
 	bool m_isAuth = false;
 	bool m_canPersist = false;
 	bool m_canAutoreset = false;
+	bool m_spaceEmergency = false;
 };
 
 }

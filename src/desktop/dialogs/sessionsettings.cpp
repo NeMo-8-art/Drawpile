@@ -169,14 +169,16 @@ void SessionSettingsDialog::reloadSettings()
 
 void SessionSettingsDialog::setPersistenceEnabled(bool enable)
 {
-	m_ui->persistent->setEnabled(m_op && enable);
+	m_ui->persistent->setEnabled((m_op || m_spaceEmergency) && enable);
 	m_canPersist = enable;
+	qWarning() << "can persist" << enable;
 }
 
 void SessionSettingsDialog::setAutoResetEnabled(bool enable)
 {
 	m_ui->autoresetThreshold->setEnabled(m_op && enable);
 	m_canAutoreset = enable;
+	qWarning() << "can autoreset" << enable;
 }
 
 void SessionSettingsDialog::setAuthenticated(bool auth)
@@ -185,6 +187,13 @@ void SessionSettingsDialog::setAuthenticated(bool auth)
 	// auth-only can only be enabled if the current user is authenticated,
 	// otherwise it's possible to accidentally lock yourself out.
 	m_ui->authOnly->setEnabled(m_op && (m_isAuth || m_ui->authOnly->isChecked()));
+}
+
+void SessionSettingsDialog::setSpaceEmergency(bool spaceEmergency)
+{
+	m_spaceEmergency = spaceEmergency;
+	m_ui->persistent->setEnabled(true);
+	m_ui->persistent->setEnabled((m_op || spaceEmergency) && m_canPersist);
 }
 
 void SessionSettingsDialog::onCanvasChanged(canvas::CanvasModel *canvas)
@@ -204,6 +213,7 @@ void SessionSettingsDialog::onCanvasChanged(canvas::CanvasModel *canvas)
 
 void SessionSettingsDialog::onOperatorModeChanged(bool op)
 {
+	qWarning() << "operator mode changed" << op;
 	QWidget *w[] = {
 		m_ui->title,
 		m_ui->maxUsers,
@@ -224,7 +234,7 @@ void SessionSettingsDialog::onOperatorModeChanged(bool op)
 	for(int i = 0; i < DP_FEATURE_COUNT; ++i)
 		featureBox(DP_Feature(i))->setEnabled(op);
 
-	m_ui->persistent->setEnabled(m_canPersist && op);
+	m_ui->persistent->setEnabled(m_canPersist && (op || m_spaceEmergency));
 	m_ui->autoresetThreshold->setEnabled(m_canAutoreset && op);
 	m_ui->authOnly->setEnabled(op && (m_isAuth || m_ui->authOnly->isChecked()));
 	m_ui->permissionPresets->setWriteOnly(!op);

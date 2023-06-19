@@ -290,6 +290,7 @@ void Client::handleServerReply(const ServerReply &reply)
 		// No longer used since 2.1.0. Replaced by RESETREQUEST
 		break;
 	case ServerReply::ReplyType::ResetRequest:
+		qWarning() << "reset request received";
 		emit autoresetRequested(reply.reply["maxSize"].toInt(), reply.reply["query"].toBool());
 		break;
 	case ServerReply::ReplyType::Status:
