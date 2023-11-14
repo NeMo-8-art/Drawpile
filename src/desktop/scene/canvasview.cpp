@@ -1194,6 +1194,8 @@ void CanvasView::touchReleaseEvent(long long timeMsec, const QPointF &pos)
 
 void CanvasView::gestureEvent(QGestureEvent *event)
 {
+	m_touching = !event->activeGestures().isEmpty();
+
 	const QPinchGesture *pinch =
 		static_cast<const QPinchGesture *>(event->gesture(Qt::PinchGesture));
 	bool hadPinchUpdate = false;
@@ -1213,7 +1215,8 @@ void CanvasView::gestureEvent(QGestureEvent *event)
 			[[fallthrough]];
 		case Qt::GestureUpdated:
 		case Qt::GestureFinished:
-			if(m_enableTouchScroll || m_enableTouchDraw) {
+			if((m_enableTouchScroll || m_enableTouchDraw) &&
+			   cf.testFlag(QPinchGesture::CenterPointChanged)) {
 				QPointF d = pinch->centerPoint() - pinch->lastCenterPoint();
 				horizontalScrollBar()->setValue(
 					horizontalScrollBar()->value() - d.x());
@@ -1223,10 +1226,12 @@ void CanvasView::gestureEvent(QGestureEvent *event)
 
 			{
 				QScopedValueRollback<bool> guard{m_blockNotices, true};
-				if(m_enableTouchPinch) {
+				if(m_enableTouchPinch &&
+				   cf.testFlag(QPinchGesture::ScaleFactorChanged)) {
 					setZoom(m_gestureStartZoom * pinch->totalScaleFactor());
 				}
-				if(m_enableTouchTwist) {
+				if(m_enableTouchTwist &&
+				   cf.testFlag(QPinchGesture::RotationAngleChanged)) {
 					setRotation(
 						m_gestureStartAngle + pinch->totalRotationAngle());
 				}
@@ -1302,9 +1307,18 @@ void CanvasView::mouseDoubleClickEvent(QMouseEvent *)
 
 void CanvasView::wheelEvent(QWheelEvent *event)
 {
+	QPoint angleDelta = event->angleDelta();
+	DP_EVENT_LOG(
+		"wheel x=%d y=%d buttons=0x%x modifiers=0x%x pendown=%d touching=%d",
+		angleDelta.x(), angleDelta.y(), unsigned(event->buttons()),
+		unsigned(event->modifiers()), m_pendown, m_touching);
+	if(m_touching) {
+		event->ignore();
+		return;
+	}
+
 	CanvasShortcuts::Match match =
 		m_canvasShortcuts.matchMouseWheel(event->modifiers(), m_keysDown);
-	QPoint angleDelta = event->angleDelta();
 	int deltaX = angleDelta.x();
 	int deltaY = angleDelta.y();
 	if(match.inverted()) {
@@ -1320,6 +1334,7 @@ void CanvasView::wheelEvent(QWheelEvent *event)
 	case CanvasShortcuts::NO_ACTION:
 		break;
 	case CanvasShortcuts::CANVAS_PAN:
+		event->accept();
 		scrollBy(-deltaX, -deltaY);
 		break;
 	case CanvasShortcuts::CANVAS_ROTATE:
@@ -1342,12 +1357,14 @@ void CanvasView::wheelEvent(QWheelEvent *event)
 	}
 	// Color and layer picking by spinning the scroll wheel is weird, but okay.
 	case CanvasShortcuts::COLOR_PICK:
+		event->accept();
 		if(m_allowColorPick && m_scene->hasImage()) {
 			QPointF p = mapToCanvas(compat::wheelPosition(*event));
 			m_scene->model()->pickColor(p.x(), p.y(), 0, 0);
 		}
 		break;
 	case CanvasShortcuts::LAYER_PICK: {
+		event->accept();
 		if(m_scene->hasImage()) {
 			QPointF p = mapToCanvas(compat::wheelPosition(*event));
 			m_scene->model()->pickLayer(p.x(), p.y());
@@ -1355,8 +1372,8 @@ void CanvasView::wheelEvent(QWheelEvent *event)
 		break;
 	}
 	case CanvasShortcuts::TOOL_ADJUST:
+		event->accept();
 		if(m_allowToolAdjust) {
-			event->accept();
 			emit quickAdjust(deltaY / (30 * 4.0));
 		}
 		break;
