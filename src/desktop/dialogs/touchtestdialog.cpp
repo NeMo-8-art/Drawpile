@@ -145,7 +145,7 @@ void TouchTestView::debugLogGestureEvent(QGestureEvent *event)
 		if(gesture->hasHotSpot()) {
 			QPointF hotSpot = gesture->hotSpot();
 			hotSpotName =
-				QStringLiteral("(%1,%2)").arg(hotSpot.x(), hotSpot.y());
+				QStringLiteral("(%1,%2)").arg(hotSpot.x()).arg(hotSpot.y());
 		}
 
 		Qt::GestureState state = gesture->state();
