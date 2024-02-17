@@ -69,10 +69,6 @@ public:
         ColorLCH,       ///< Use Luma Chroma Hue (Y_601')
     };
 
-    Q_ENUM(ShapeEnum);
-    Q_ENUM(AngleEnum);
-    Q_ENUM(ColorSpaceEnum);
-
     explicit ColorWheel(QWidget *parent = 0);
     ~ColorWheel();
 
@@ -186,5 +182,11 @@ private:
 };
 
 } // namespace color_widgets
+
+
+Q_DECLARE_METATYPE(color_widgets::ColorWheel::ShapeEnum);
+Q_DECLARE_METATYPE(color_widgets::ColorWheel::AngleEnum);
+Q_DECLARE_METATYPE(color_widgets::ColorWheel::ColorSpaceEnum);
+
 
 #endif // COLOR_WHEEL_HPP
