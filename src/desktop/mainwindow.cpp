@@ -2894,6 +2894,8 @@ void MainWindow::selectionChanged(canvas::Selection *selection)
 	getAction("fillfgarea")->setEnabled(haveSelection);
 	getAction("recolorarea")->setEnabled(haveSelection);
 	getAction("colorerasearea")->setEnabled(haveSelection);
+	getAction("lightnesstoalphaarea")->setEnabled(haveSelection);
+	getAction("darknesstoalphaarea")->setEnabled(haveSelection);
 	bool haveAnnotation =
 		getAction("tooltext")->isChecked() &&
 		m_dockToolSettings->annotationSettings()->selected() != 0;
@@ -3663,6 +3665,8 @@ void MainWindow::setupActions()
 	QAction *fillfgarea = makeAction("fillfgarea", tr("Fill Selection")).shortcut(CTRL_KEY | Qt::Key_Comma);
 	QAction *recolorarea = makeAction("recolorarea", tr("Recolor Selection")).shortcut(CTRL_KEY | Qt::SHIFT | Qt::Key_Comma);
 	QAction *colorerasearea = makeAction("colorerasearea", tr("Color Erase Selection")).shortcut(Qt::SHIFT | Qt::Key_Delete);
+	QAction *lightnesstoalphaarea = makeAction("lightnesstoalphaarea", tr("Selection Lightness to Alpha")).noDefaultShortcut();
+	QAction *darknesstoalphaarea = makeAction("darknesstoalphaarea", tr("Selection Darkness to Alpha")).noDefaultShortcut();
 
 	m_currentdoctools->addAction(copy);
 	m_currentdoctools->addAction(copylayer);
@@ -3682,6 +3686,8 @@ void MainWindow::setupActions()
 	m_putimagetools->addAction(fillfgarea);
 	m_putimagetools->addAction(recolorarea);
 	m_putimagetools->addAction(colorerasearea);
+	m_putimagetools->addAction(lightnesstoalphaarea);
+	m_putimagetools->addAction(darknesstoalphaarea);
 
 	m_canvasbgtools->addAction(canvasBackground);
 	m_resizetools->addAction(resize);
@@ -3729,6 +3735,13 @@ void MainWindow::setupActions()
 		QColor color = m_dockToolSettings->foregroundColor();
 		m_dockToolSettings->addLastUsedColor(color);
 		m_doc->fillArea(color, DP_BLEND_MODE_COLOR_ERASE);
+	});
+	// For lightness/darkness to alpha, the color is irrelevant.
+	connect(lightnesstoalphaarea, &QAction::triggered, this, [this]() {
+		m_doc->fillArea(Qt::white, DP_BLEND_MODE_LIGHT_TO_ALPHA);
+	});
+	connect(darknesstoalphaarea, &QAction::triggered, this, [this]() {
+		m_doc->fillArea(Qt::black, DP_BLEND_MODE_DARK_TO_ALPHA);
 	});
 	connect(resize, SIGNAL(triggered()), this, SLOT(resizeCanvas()));
 	connect(canvasBackground, &QAction::triggered, this, &MainWindow::changeCanvasBackground);
@@ -3791,6 +3804,8 @@ void MainWindow::setupActions()
 	editmenu->addAction(fillfgarea);
 	editmenu->addAction(recolorarea);
 	editmenu->addAction(colorerasearea);
+	editmenu->addAction(lightnesstoalphaarea);
+	editmenu->addAction(darknesstoalphaarea);
 	editmenu->addSeparator();
 	editmenu->addAction(brushSettings);
 #ifdef Q_OS_WIN32
