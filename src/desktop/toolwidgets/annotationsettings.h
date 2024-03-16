@@ -57,6 +57,7 @@ public slots:
 
 private slots:
 	void changeAlignment(const QAction *action);
+	void changeRender(const QAction *action);
 	void toggleBold(bool bold);
 	void toggleStrikethrough(bool strike);
 	void updateStyleButtons();
@@ -73,10 +74,15 @@ protected:
 	QWidget *createUiWidget(QWidget *parent) override;
 
 private:
+	static constexpr char HALIGN_PROP[] = "HALIGN";
+	static constexpr char VALIGN_PROP[] = "VALIGN";
+	static constexpr char RENDER_PROP[] = "RENDER";
+
 	void resetContentFormat();
 	void resetContentFont(bool resetFamily, bool resetSize, bool resetColor);
 	void setFontFamily(QTextCharFormat &fmt);
 	void setUiEnabled(bool enabled);
+	bool shouldAlias() const;
 
 	Ui_TextSettings *m_ui;
 	QWidget *m_headerWidget;
