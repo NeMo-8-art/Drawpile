@@ -47,6 +47,12 @@ endif()
 
 if(QT_VERSION VERSION_LESS 6)
 	option(ANDROID_EXTRAS "Build qtandroidextras (Qt5 only)" ${ANDROID})
+	if(UNIX AND NOT APPLE AND NOT ANDROID)
+		set(WAYLAND_PLATFORM_DEFAULT ON)
+	else()
+		set(WAYLAND_PLATFORM_DEFAULT OFF)
+	endif()
+	option(WAYLAND_PLATFORM "Build qtwayland (Qt5 only)" "${WAYLAND_PLATFORM_DEFAULT}")
 endif()
 
 include(QtMacDeploymentTarget)
@@ -441,6 +447,19 @@ if(WEBSOCKETS)
 			SHA384=aa5c23820c0c199740c8969078b90819481300aacc1cd10e3a6f8568b9dda6967aaaf26eb0ddde89223468b07ccc69a8
 			6.6.3
 			SHA384=ab03771750ddbd06883255d39d463dae06b8228527a20f2a43a0aeb21fba2a6a01afb59bedace0104e0b89f05270c287
+		ALL_PLATFORMS
+			${MODULE_GENERATOR}
+	)
+endif()
+
+if(WAYLAND_PLATFORM)
+	build_dependency(qtwayland ${QT_VERSION} ${BUILD_TYPE}
+		URL "${URL}"
+		TARGET_BITS "${TARGET_BITS}"
+		SOURCE_DIR "@name@-everywhere-src-@version@"
+		VERSIONS
+			5.15.8
+			SHA384=3b9fa05075544097c8ae57c7cdb1841bbe87f15c0ea10b085f5606ad572acdbee793ec91ff6dfb4efa5c1ca0b3264c46
 		ALL_PLATFORMS
 			${MODULE_GENERATOR}
 	)
