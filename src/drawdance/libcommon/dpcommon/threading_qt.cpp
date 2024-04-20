@@ -32,6 +32,7 @@ extern "C" {
 #endif
 }
 #include <QByteArray>
+#include <QCoreApplication>
 #include <QMutex>
 #include <QSemaphore>
 #include <QSharedPointer>
@@ -132,6 +133,11 @@ extern "C" DP_SemaphoreResult DP_semaphore_try_wait(DP_Semaphore *sem)
     }
 }
 
+
+extern "C" DP_ProcessId DP_process_current_id(void)
+{
+    return QCoreApplication::applicationPid();
+}
 
 extern "C" unsigned long long DP_thread_current_id(void)
 {

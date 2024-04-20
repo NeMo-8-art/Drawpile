@@ -28,6 +28,10 @@ elseif(ZIP_IMPL STREQUAL "KARCHIVE")
     dp_find_package(KF5Archive REQUIRED)
 endif()
 
+if(ENABLE_PROJECT)
+    dp_find_package(SQLite3 REQUIRED)
+endif()
+
 if(USE_GENERATORS)
     dp_find_package("Qt${QT_VERSION_MAJOR}" COMPONENTS Core Gui)
 endif()

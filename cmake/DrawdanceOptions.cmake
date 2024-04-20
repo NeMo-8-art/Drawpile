@@ -22,3 +22,7 @@ endif()
 add_feature_info("Image library implementation (IMAGE_IMPL)" ON ${IMAGE_IMPL})
 add_feature_info("File I/O implementation (FILE_IO_IMPL)" ON ${FILE_IO_IMPL})
 add_feature_info("ZIP implementation (ZIP_IMPL)" ON ${ZIP_IMPL})
+
+option(ENABLE_PROJECT "Experimental project file format" OFF)
+add_feature_info(
+    "Experimental project file format (ENABLE_PROJECT)" ENABLE_PROJECT "")

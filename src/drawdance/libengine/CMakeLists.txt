@@ -133,6 +133,12 @@ else()
     message(SEND_ERROR "Unknown IMAGE_IMPL value '${IMAGE_IMPL}'")
 endif()
 
+if(ENABLE_PROJECT)
+    target_compile_definitions(dpengine PUBLIC HAVE_PROJECT=1)
+    target_sources(dpengine PRIVATE dpengine/project.c dpengine/project.h)
+    target_link_libraries(dpengine PUBLIC SQLite::SQLite3)
+endif()
+
 if(TESTS)
     add_library(dptest_engine)
     target_sources(dptest_engine PRIVATE
@@ -150,6 +156,7 @@ if(TESTS)
         test/handle_timeline.c
         test/image_thumbnail.c
         test/pixel_conversion.c
+        test/project.c
         test/resize_image.c
     )
 endif()
