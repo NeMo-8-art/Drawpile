@@ -3,6 +3,7 @@ body {
   background-color: #fff;
   color: #363636;
   font-family: sans-serif;
+  touch-action: pan-y;
 }
 
 .fullscreen {
@@ -10,6 +11,12 @@ body {
   margin: 0;
   overflow: hidden;
   padding: 0;
+}
+
+@supports(height: 100dvh) {
+  .fullscreen {
+    height: 100dvh;
+  }
 }
 
 #init {
@@ -151,6 +158,12 @@ progress {
   margin-right: auto;
   margin-top: 1em;
   max-width: 60em;
+}
+
+@supports(height: calc(100dvh - 2em)) {
+  .modal-container {
+    height: calc(100dvh - 2em);
+  }
 }
 
 .modal-body {
