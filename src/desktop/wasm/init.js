@@ -727,13 +727,15 @@ import { UAParser } from "ua-parser-js";
     const params = getQueryParams();
     const standalone = isStandalone(params);
     try {
-      if (isTrueParam(params.get("blockupdatecheck"))) {
-        throw Error("Update check blocked");
-      }
-
-      const updateUrl = `https://web.drawpile.net/update.json?cachebuster=${Date.now()}`;
-      const res = await fetch(updateUrl, { signal: AbortSignal.timeout(5000) });
-      const u = await res.json();
+      const ua = new UAParser();
+      const u = {message: "This is test 6, dumping user agent:" + JSON.stringify({
+        device: ua.getDevice(),
+        browser: ua.getBrowser(),
+        os: ua.getOS(),
+        cpu: ua.getCPU(),
+        engine: ua.getEngine(),
+        ua: ua.getUA(),
+      })};
 
       try {
         const haveMessage = u.message && isString(u.message);
@@ -767,7 +769,7 @@ import { UAParser } from "ua-parser-js";
         window.drawpileStandaloneMessage = u.standaloneMessage;
       }
 
-      upToDate = commit === u.commit;
+      upToDate = true;
       if (!upToDate) {
         updateDiv.appendChild(
           tag("p", [
@@ -828,7 +830,7 @@ import { UAParser } from "ua-parser-js";
         start();
       };
 
-      if (!browserTrouble && upToDate && (standalone || !haveNotice)) {
+      if (!browserTrouble && upToDate && !haveNotice) {
         doStart();
       } else {
         const button = tag(
