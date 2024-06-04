@@ -39,6 +39,8 @@ elseif(WIN32)
 		set(CPACK_WIX_PROPERTY_ARPURLUPDATEINFO ${PROJECT_HOMEPAGE_URL}/download/)
 		set(CPACK_WIX_PROPERTY_ARPHELPLINK ${PROJECT_HOMEPAGE_URL}/help/)
 
+		set(CPACK_WIX_INSTALL_SCOPE NONE)
+
 		include(DrawpileFileExtensions)
 		get_wix_extensions("${PROJECT_NAME}" "drawpile.exe" WIX_DRAWPILE_PROGIDS)
 		if(MSVC)
