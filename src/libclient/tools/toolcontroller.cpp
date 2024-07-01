@@ -10,6 +10,7 @@
 #include "libclient/tools/colorpicker.h"
 #include "libclient/tools/floodfill.h"
 #include "libclient/tools/freehand.h"
+#include "libclient/tools/gradient.h"
 #include "libclient/tools/inspector.h"
 #include "libclient/tools/laser.h"
 #include "libclient/tools/magicwand.h"
@@ -58,6 +59,7 @@ ToolController::ToolController(net::Client *client, QObject *parent)
 	registerTool(new Ellipse(*this));
 	registerTool(new BezierTool(*this));
 	registerTool(new FloodFill(*this));
+	registerTool(new GradientTool(*this));
 	registerTool(new Annotation(*this));
 	registerTool(new LaserPointer(*this));
 	registerTool(new RectangleSelection(*this));
@@ -219,6 +221,16 @@ void ToolController::setForegroundColor(const QColor &color)
 		m_foregroundColor = color;
 		if(m_activeTool) {
 			m_activeTool->setForegroundColor(color);
+		}
+	}
+}
+
+void ToolController::setBackgroundColor(const QColor &color)
+{
+	if(color != m_backgroundColor) {
+		m_backgroundColor = color;
+		if(m_activeTool) {
+			m_activeTool->setBackgroundColor(color);
 		}
 	}
 }

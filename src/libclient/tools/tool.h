@@ -32,6 +32,7 @@ public:
 		ELLIPSE,
 		BEZIER,
 		FLOODFILL,
+		GRADIENT,
 		ANNOTATION,
 		PICKER,
 		LASERPOINTER,
@@ -142,6 +143,9 @@ public:
 
 	//! Current foreground color changed
 	virtual void setForegroundColor(const QColor &color) { Q_UNUSED(color); }
+
+	//! Current background color changed
+	virtual void setBackgroundColor(const QColor &color) { Q_UNUSED(color); }
 
 	//! If this tool is operating or is waiting for a click to confirm
 	//! something. For example, the fill tool asks for confirmation to fill.

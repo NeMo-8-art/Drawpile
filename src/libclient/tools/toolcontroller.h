@@ -93,6 +93,9 @@ public:
 	void setForegroundColor(const QColor &color);
 	const QColor &foregroundColor() const { return m_foregroundColor; }
 
+	void setBackgroundColor(const QColor &color);
+	const QColor &backgroundColor() const { return m_backgroundColor; }
+
 	bool isDrawing() const { return m_drawing; }
 
 	void setInterpolateInputs(bool interpolateInputs);
@@ -224,6 +227,8 @@ signals:
 	void colorUsed(const QColor &color);
 	void panRequested(int x, int y);
 	void zoomRequested(const QRect &rect, int steps);
+	void anchorLineRequested(const QVector<QPointF> &points, int activeIndex);
+	void anchorLineActiveIndexRequested(int activeIndex);
 	void maskPreviewRequested(const QPoint &pos, const QImage &mask);
 	void pathPreviewRequested(const QPainterPath &path);
 	void transformRequested();
@@ -257,6 +262,7 @@ private:
 	uint16_t m_activeLayer;
 	uint16_t m_activeAnnotation;
 	QColor m_foregroundColor;
+	QColor m_backgroundColor;
 	bool m_drawing;
 	bool m_applyGlobalSmoothing;
 	bool m_mouseSmoothing;
